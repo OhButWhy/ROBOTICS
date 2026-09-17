@@ -1,0 +1,14 @@
+{
+  "launch_method": "wsl2",
+  "os": {
+    "name": "Ubuntu",
+    "version": "24.04",
+    "pretty_name": "Ubuntu 24.04.5 LTS",
+    "kernel": "6.6.87.2-microsoft-standard-WSL2"
+  },
+  "ros": {
+    "distro": "jazzy",
+    "rmw_implementation": "unknown"
+  },
+  "domains":[16,17]
+}

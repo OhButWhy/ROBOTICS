@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR01",
+  "commit": "44b283370836563aa4f1515473cc64bbc0c6157e",
+  "course_kit": {
+    "version": "v1-w01",
+    "archive_sha256": "92fade3ae7228674042acc2e8930d43a221d9a8b75e7ae72a3df62684d8608e1"
+  },
+  "commands": [
+    "source /opt/ros/jazzy/setup.bash && export ROS_DOMAIN_ID=16",
+    "ros2 run turtlesim turtlesim_node",
+    "ros2 run turtlesim turtle_teleop_key",
+    "ros2 doctor --report > evidence/pr01/doctor.txt 2>&1",
+    "ros2 node list --no-daemon --spin-time 2 > evidence/pr01/nodes-before.txt",
+    "ros2 topic list -t > evidence/pr01/topics.txt",
+    "ros2 node info /turtlesim > evidence/pr01/turtlesim-info.txt",
+    "ros2 node info /teleop_turtle > evidence/pr01/teleop-info.txt",
+    "ros2 topic type /turtle1/pose > evidence/pr01/pose-type.txt",
+    "ros2 topic echo /turtle1/pose --once > evidence/pr01/pose-before.txt",
+    "timeout --signal=INT 15s ros2 topic hz /turtle1/pose > evidence/pr01/pose-hz.txt 2>&1",
+    "ros2 topic echo /turtle1/pose --once > evidence/pr01/pose-after-key-working.txt",
+    "export ROS_DOMAIN_ID=17 && ros2 run turtlesim turtle_teleop_key",
+    "export ROS_DOMAIN_ID=17 && ros2 node list --no-daemon --spin-time 2 > evidence/pr01/nodes-broken.txt",
+    "timeout 5s ros2 topic echo /turtle1/pose turtlesim_msgs/msg/Pose --once > evidence/pr01/pose-broken.txt 2>&1",
+    "ROS_DOMAIN_ID=16 ros2 topic echo /turtle1/pose --once > evidence/pr01/pose-after-key-broken-control.txt",
+    "export ROS_DOMAIN_ID=16 && ros2 run turtlesim turtle_teleop_key",
+    "ros2 node list --no-daemon --spin-time 2 > evidence/pr01/nodes-fixed.txt",
+    "timeout 5s ros2 topic echo /turtle1/pose turtlesim_msgs/msg/Pose --once > evidence/pr01/pose-fixed.txt 2>&1",
+    "ros2 topic echo /turtle1/pose --once > evidence/pr01/pose-after-key-fixed.txt"
+  ],
+  "tests": [{"name": "check", "status": "passed"}],
+  "defect": {
+    "reproducer": "В терминале B после Ctrl+C выполнить 'export ROS_DOMAIN_ID=17' и заново 'ros2 run turtlesim turtle_teleop_key'; в терминале C выполнить 'export ROS_DOMAIN_ID=17' и 'timeout 5s ros2 topic echo /turtle1/pose turtlesim_msgs/msg/Pose --once'. Симптом: 'ros2 node list' в C видит только /teleop_turtle (нет /turtlesim), echo позы завершается по таймауту с кодом 124, нажатие стрелки вверх в B не двигает черепаху; контрольное чтение 'ROS_DOMAIN_ID=16 ros2 topic echo /turtle1/pose --once' показывает ту же позу, что до нажатия.",
+    "root_cause": "ROS_DOMAIN_ID задаёт DDS-домен; участники с разными ROS_DOMAIN_ID не проходят discovery друг с другом при одинаковых сети, RMW и хосте. После 'export ROS_DOMAIN_ID=17' в B и C нода turtlesim (A, домен 16) и teleop (B, домен 17) оказались в разных DDS-доменах: cmd_vel из B не доходит до A, а C не видит /turtlesim и не получает /turtle1/pose. Сеть, RMW и сами ноды при этом исправны — в домене 16 граф работает, частота /turtle1/pose стабильна ≈ 62.5 Гц.",
+    "proof_after": "В B и C выполнить 'export ROS_DOMAIN_ID=16' и перезапустить 'ros2 run turtlesim turtle_teleop_key'. Проверки в C: 'ros2 node list' возвращает 2 строки (/turtlesim, /teleop_turtle); 'timeout 5s ros2 topic echo /turtle1/pose turtlesim_msgs/msg/Pose --once' завершается с кодом 0 и печатает позу; после нажатия ↑ в B координаты меняются (x: 4.6893 → 3.2470, y: 9.8708 → 11.0889). Файлы улик: evidence/pr01/nodes-fixed.txt, pose-fixed.txt, pose-fixed-exit.txt, pose-after-key-fixed.txt."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 6
+  },
+  "ai_used": false
+}

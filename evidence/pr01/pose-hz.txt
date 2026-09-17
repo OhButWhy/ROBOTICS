@@ -1,0 +1,25 @@
+WARNING: topic [/turtle1/pose] does not appear to be published yet
+average rate: 62.455
+	min: 0.014s max: 0.018s std dev: 0.00092s window: 64
+average rate: 62.413
+	min: 0.014s max: 0.018s std dev: 0.00086s window: 127
+average rate: 62.476
+	min: 0.013s max: 0.018s std dev: 0.00087s window: 190
+average rate: 62.508
+	min: 0.013s max: 0.019s std dev: 0.00084s window: 253
+average rate: 62.502
+	min: 0.013s max: 0.019s std dev: 0.00078s window: 316
+average rate: 62.503
+	min: 0.013s max: 0.019s std dev: 0.00076s window: 379
+average rate: 62.505
+	min: 0.013s max: 0.019s std dev: 0.00075s window: 442
+average rate: 62.492
+	min: 0.013s max: 0.019s std dev: 0.00075s window: 505
+average rate: 62.486
+	min: 0.013s max: 0.019s std dev: 0.00077s window: 568
+average rate: 62.496
+	min: 0.013s max: 0.019s std dev: 0.00077s window: 631
+average rate: 62.495
+	min: 0.013s max: 0.019s std dev: 0.00078s window: 694
+average rate: 62.496
+	min: 0.013s max: 0.019s std dev: 0.00077s window: 757
