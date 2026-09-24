@@ -1,38 +1,41 @@
-# PR01 - Граф ROS 2: исправное состояние, разрыв и восстановление
+# ROBOTICS — практические работы
 
-Демонстрация базового графа ROS 2 (turtlesim + teleop) и эффекта
-рассогласования `ROS_DOMAIN_ID` между участниками.
+Репозиторий с лабораторными работами курса. Каждая ПР — отдельная папка
+в `evidence/<PR_ID>/`, исходный код — в `src/`.
+
+- **PR01** — базовый граф ROS 2 (turtlesim + teleop), разрыв по `ROS_DOMAIN_ID`.
+- **PR02** — пакет `turtle_bringup`, launch-файл, CLI-доставка команды.
 
 ## Среда
 
-- ROS 2: **jazzy** (`osrf/ros:jazzy-desktop-full`)
-- Запуск: WSL2 (Ubuntu 24.04)
-- Один рабочий каталог `~/robotics_ws`, образ/дистрибутив фиксированы.
+- ROS 2: **jazzy** (`source /opt/ros/jazzy/setup.bash`)
+- Домен: `ROS_DOMAIN_ID=16`
+- Workspace: корень этого репозитория
+- Запуск: WSL2 (Ubuntu 24.04) либо Docker-образ `osrf/ros:jazzy-desktop-full`
 
-## Порядок запуска
+## PR01 — порядок запуска
 
-Три терминала A/B/C. В каждом перед началом:
+Три терминала A/B/C, в каждом:
 
 ```bash
 source /opt/ros/jazzy/setup.bash
 export ROS_DOMAIN_ID=16
-cd ~/robotics_ws
+cd "$(git rev-parse --show-toplevel)"
 ```
 
-### Терминал A - симулятор
+Терминал A — симулятор:
 
 ```bash
 ros2 run turtlesim turtlesim_node
 ```
 
-### Терминал B - управление
+Терминал B — управление (фокус оставить здесь, стрелками двигать черепаху):
 
 ```bash
 ros2 run turtlesim turtle_teleop_key
-# фокус оставить в этом терминале, стрелками управлять черепахой
 ```
 
-### Терминал C - сбор информации
+Терминал C — сбор улик:
 
 ```bash
 mkdir -p evidence/pr01
@@ -42,11 +45,10 @@ ros2 topic list -t                  > evidence/pr01/topics.txt
 ros2 node info /turtlesim           > evidence/pr01/turtlesim-info.txt
 ros2 node info /teleop_turtle       > evidence/pr01/teleop-info.txt
 ros2 topic type /turtle1/pose       > evidence/pr01/pose-type.txt
-POSE_TYPE=$(cat evidence/pr01/pose-type.txt)
 ros2 topic echo /turtle1/pose --once > evidence/pr01/pose-before.txt
 ```
 
-Замер частоты `/turtle1/pose` в покое (15 с, завершение по `SIGINT`):
+Замер частоты `/turtle1/pose` в покое:
 
 ```bash
 TIMEFORMAT='elapsed_seconds=%R'
@@ -55,75 +57,75 @@ TIMEFORMAT='elapsed_seconds=%R'
 printf 'exit=%s\n' "$?" > evidence/pr01/pose-hz-exit.txt
 ```
 
-После одного нажатия ↑ в B и остановки черепахи:
+Полный сценарий разрыва (домен 17) и восстановления — в `evidence/pr01/graph.md`.
+
+## PR02 — порядок сборки и запуска
+
+### Сборка
 
 ```bash
-ros2 topic echo /turtle1/pose --once > evidence/pr01/pose-after-key-working.txt
+source /opt/ros/jazzy/setup.bash
+cd "$(git rev-parse --show-toplevel)"
+set -o pipefail
+colcon build --symlink-install --packages-select turtle_bringup \
+  2>&1 | tee evidence/pr02/build.txt
+source install/setup.bash
+ros2 pkg prefix turtle_bringup     # → путь внутри install/
 ```
 
-## Воспроизведение дефекта (разрыв графа)
+### Запуск launch-файла
 
-В B останавливаем teleop (`Ctrl+C`) и перезапускаем в другом домене:
-
-```bash
-export ROS_DOMAIN_ID=17
-ros2 run turtlesim turtle_teleop_key
-```
-
-В C - проверка в домене 17:
+Терминал A:
 
 ```bash
-export ROS_DOMAIN_ID=17
-ros2 node list --no-daemon --spin-time 2 > evidence/pr01/nodes-broken.txt
-timeout 5s ros2 topic echo /turtle1/pose "$POSE_TYPE" --once \
-  > evidence/pr01/pose-broken.txt 2>&1
-printf 'exit=%s\n' "$?" > evidence/pr01/pose-broken-exit.txt
-```
-
-Нажимаем ↑ в B. Контрольное чтение из домена симулятора:
-
-```bash
-ROS_DOMAIN_ID=16 ros2 topic echo /turtle1/pose --once \
-  > evidence/pr01/pose-after-key-broken-control.txt
-```
-
-Ожидаемый симптом: `nodes-broken.txt` содержит только `/teleop_turtle`,
-`pose-broken-exit.txt` = 124 (таймаут), черепаха не двигается.
-
-## Восстановление
-
-В B возвращаем домен и перезапустить teleop:
-
-```bash
+source /opt/ros/jazzy/setup.bash
+source install/setup.bash
 export ROS_DOMAIN_ID=16
-ros2 run turtlesim turtle_teleop_key
+ros2 launch turtle_bringup sim.launch.py
 ```
 
-В C - та же проверка, что и в исправном состоянии:
+Проверка графа (терминал C):
 
 ```bash
-export ROS_DOMAIN_ID=16
-ros2 node list --no-daemon --spin-time 2 > evidence/pr01/nodes-fixed.txt
-timeout 5s ros2 topic echo /turtle1/pose "$POSE_TYPE" --once \
-  > evidence/pr01/pose-fixed.txt 2>&1
-printf 'exit=%s\n' "$?" > evidence/pr01/pose-fixed-exit.txt
-
-# после ↑ в B:
-ros2 topic echo /turtle1/pose --once > evidence/pr01/pose-after-key-fixed.txt
+ros2 node list --no-daemon --spin-time 2
+# → /turtlesim
 ```
 
-Ожидаемый результат: `nodes-fixed.txt` = 2 строки, `pose-fixed-exit.txt` = 0,
-поза меняется после ↑.
+Остановка — `Ctrl+C` в A.
+
+### Доставка команды (терминал B)
+
+```bash
+ros2 topic pub --once /turtle1/cmd_vel geometry_msgs/msg/Twist \
+  '{linear: {x: 1.0}, angular: {z: 0.5}}'
+```
+
+Проверка в C:
+
+```bash
+ros2 topic echo /turtle1/pose --once
+```
+
+### Ошибочный топик (для PR02, стадия «сломать»)
+
+```bash
+ros2 topic pub --rate 1 --wait-matching-subscriptions 0 \
+  /cmd_vel geometry_msgs/msg/Twist \
+  '{linear: {x: 1.0}, angular: {z: 0.5}}'
+
+ros2 topic info /cmd_vel --verbose
+# → Publisher count: 1, Subscription count: 0
+```
+
+Полное сравнение «до / сбой / после» — в `evidence/pr02/commands.md`,
+типы сообщений — в `evidence/pr02/types.md`.
 
 ## Артефакты
 
 | Путь | Содержимое |
 |---|---|
-| `evidence/pr01/doctor.txt` | `ros2 doctor --report` |
-| `evidence/pr01/topics.txt` | список топиков с типами |
-| `evidence/pr01/pose-hz.txt` | `ros2 topic hz` за 15 с |
-| `evidence/pr01/nodes-{before,broken,fixed}.txt` | три состояния графа |
-| `evidence/pr01/pose-*.txt` | позы в ключевых точках |
-| `evidence/pr01/environment.json` | описание среды |
-| `evidence/pr01/graph.md` | разбор трёх состояний и причины сбоя |
-| `report.json` | формальный отчёт PR01 |
+| `src/turtle_bringup/` | пакет: `package.xml`, `setup.py`, `launch/sim.launch.py` |
+| `evidence/pr01/` | улики PR01 (`report.json`, `graph.md`, `*.txt`) |
+| `evidence/pr02/` | улики PR02 (`report.json`, `commands.md`, `types.md`, `build*.txt`) |
+| `AI_USAGE.md` | записи об использовании ИИ по каждой ПР |
+| `.github/workflows/` | CI: сборка `turtle_bringup`, запуск `check_practice.py` |
