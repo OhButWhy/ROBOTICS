@@ -1,0 +1,32 @@
+Starting >>> patrol
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+cachedir: /home/naskok/robotics_ws/build/patrol/.pytest_cache
+rootdir: /home/naskok/robotics_ws/src/patrol
+plugins: launch-testing-3.4.11, ament-flake8-0.17.5, ament-xmllint-0.17.5, ament-copyright-0.17.5, launch-testing-ros-0.26.12, ament-pep257-0.17.5, ament-lint-0.17.5, cov-4.1.0, colcon-core-0.21.1
+collected 5 items
+
+test/test_command.py ..                                                  [ 40%]
+test/test_copyright.py s                                                 [ 60%]
+test/test_flake8.py .                                                    [ 80%]
+
+=============================== warnings summary ===============================
+test/test_flake8.py: 16 warnings
+  Warning: This process (pid=1262) is multi-threaded, use of fork() may lead to deadlocks in the child.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+test/test_pep257.py .                                                    [100%]
+----- generated xml file: /home/naskok/robotics_ws/build/patrol/pytest.xml -----
+================== 4 passed, 1 skipped, 16 warnings in 1.01s ===================
+--- stderr: patrol
+
+=============================== warnings summary ===============================
+test/test_flake8.py: 16 warnings
+  Warning: This process (pid=1262) is multi-threaded, use of fork() may lead to deadlocks in the child.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+---
+Finished <<< patrol [2.44s]
+
+Summary: 1 package finished [2.85s]
+  1 package had stderr output: patrol
