@@ -129,3 +129,55 @@ ros2 topic info /cmd_vel --verbose
 | `evidence/pr02/` | улики PR02 (`report.json`, `commands.md`, `types.md`, `build*.txt`) |
 | `AI_USAGE.md` | записи об использовании ИИ по каждой ПР |
 | `.github/workflows/` | CI: сборка `turtle_bringup`, запуск `check_practice.py` |
+
+## PR03 — нода `patrol`: своя нода с подпиской, таймером и публикацией
+
+Пакет `patrol` создаёт ноду, которая следит за `/turtle1/pose` и раз в 0.1 с
+отправляет `Twist` в `cmd_vel` (относительное имя). В `cmd_vel` — `linear.x=0.5`,
+`angular.z=0.3`, что даёт круг радиусом ≈1.67.
+
+### Сборка и тесты
+
+```bash
+source /opt/ros/jazzy/setup.bash
+cd "$(git rev-parse --show-toplevel)"
+colcon build --symlink-install --packages-select patrol
+colcon test  --packages-select patrol --event-handlers console_direct+
+colcon test-result --verbose
+```
+
+### Запуск
+
+Терминал A — симулятор:
+
+```bash
+source install/setup.bash
+ros2 run turtlesim turtlesim_node
+```
+
+Терминал B — нода патруля (с ремапом топика):
+
+```bash
+source install/setup.bash
+ros2 run patrol patrol --ros-args -r cmd_vel:=/turtle1/cmd_vel
+```
+
+Терминал C — измерение частоты публикации:
+
+```bash
+timeout 10s ros2 topic hz /turtle1/cmd_vel
+```
+
+Ожидаемо: ≈10 Гц.
+
+### Разбор имени топика
+
+Без ремапа нода публикует в `/cmd_vel` (относительное имя + неймспейс `/`),
+а turtlesim слушает `/turtle1/cmd_vel`. Доставки нет. Проверка:
+
+```bash
+ros2 topic info /cmd_vel --verbose
+# Publisher count: 1, Subscription count: 0
+```
+
+Ремап `-r cmd_vel:=/turtle1/cmd_vel` связывает publisher с подписчиком.
