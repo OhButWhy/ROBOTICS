@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR02",
+  "commit": "09847993f4518464e3497d047ba9081e477f34a5",
+  "course_kit": {
+    "version": "v1-w03",
+    "archive_sha256": "7fbfd3e8161ab6c6ebefc7663efdaf77d9a7d490399743507f33dcefbd5ac522"
+  },
+  "commands": [
+    "source /opt/ros/jazzy/setup.bash && cd \"$(git rev-parse --show-toplevel)\"",
+    "ros2 pkg create --build-type ament_python --node-name patrol patrol --dependencies rclpy geometry_msgs",
+    "colcon build --symlink-install --packages-select patrol",
+    "colcon test --packages-select patrol --event-handlers console_direct+",
+    "colcon test-result --verbose",
+    "ros2 run turtlesim turtlesim_node",
+    "ros2 run patrol patrol",
+    "ros2 topic info /cmd_vel --verbose",
+    "ros2 topic info /turtle1/cmd_vel --verbose",
+    "ros2 run patrol patrol --ros-args -r cmd_vel:=/turtle1/cmd_vel",
+    "timeout 10s ros2 topic hz /turtle1/cmd_vel"
+  ],
+  "tests": [{ "name": "test_missing_pose_is_zero", "status": "passed" },
+    { "name": "test_normal_pose_returns_patrol", "status": "passed" },
+    { "name": "test_flake8", "status": "passed" },
+    { "name": "test_pep257", "status": "passed" },
+    { "name": "test_copyright", "status": "skipped" }],
+  "defect": {
+    "reproducer": "Запуск 'ros2 run patrol patrol' (терминал B) с turtlesim в терминале A. Нода создаёт publisher на относительном имени cmd_vel, которое резолвится в /cmd_vel, тогда как turtlesim слушает /turtle1/cmd_vel. Проверка 'ros2 topic info /cmd_vel --verbose' показывает Publisher count: 1, Subscription count: 0; 'ros2 topic info /turtle1/cmd_vel --verbose' — Publisher count: 0, Subscription count: 1. Черепаха не двигается, хотя тип Twist совпадает и нода публикует с частотой ~10 Гц (видно через 'ros2 topic hz /cmd_vel').",
+    "root_cause": "DDS сопоставляет publisher и subscriber по паре (имя топика, тип сообщения). Относительное имя 'cmd_vel' у ноды /patrol разворачивается в /cmd_vel, а turtlesim подписан на /turtle1/cmd_vel. Имена разные — discovery видит обе стороны, но доставки нет. Это отличается от PR02: там имя было задано в CLI, здесь — в коде через относительное имя без ведущего слэша. Механизм ремапа ROS 2 (-r cmd_vel:=/turtle1/cmd_vel) подменяет имя при создании publisher, не требуя правки исходников.",
+    "proof_after": "Перезапуск 'ros2 run patrol patrol --ros-args -r cmd_vel:=/turtle1/cmd_vel'. Проверка 'ros2 topic info /turtle1/cmd_vel --verbose' показывает Publisher count: 1 (patrol), Subscription count: 1 (turtlesim). Черепаха начинает двигаться по кругу. 'timeout 10s ros2 topic hz /turtle1/cmd_vel' даёт ~10 Гц со стабильным окном (min 0.099s, max 0.101s, std dev ~0.0005s) — таймер 0.1 с работает как задумано. Файлы улик: evidence/pr03/hz.txt, evidence/pr03/topic-info-broken.txt, evidence/pr03/topic-info-fixed.txt, evidence/pr03/demo.md."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 6
+  },
+  "ai_used": false
+}
