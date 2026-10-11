@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR05",
+  "commit": "e8987a3640a3ababf3730f198bf9e2ee0bc254cf",
+  "course_kit": {
+    "version": "v1-w05",
+    "archive_sha256": "bca214e3de6f90f9513049dfa0f36fee65ad834da502dc3f3f8fb443517b5197"
+  },
+  "commands": [
+    "source /opt/ros/jazzy/setup.bash && cd \"$(git rev-parse --show-toplevel)\"",
+    "ros2 pkg create --build-type ament_python --node-name pose_relay course_bringup --dependencies rclpy turtlesim launch launch_ros",
+    "colcon build --symlink-install --packages-select course_bringup",
+    "colcon test --packages-select course_bringup --event-handlers console_direct+",
+    "colcon test-result --verbose",
+    "ros2 run turtlesim turtlesim_node",
+    "ros2 launch course_bringup patrol.launch.py namespace:=robot_a subscriber_reliability:=reliable record:=false",
+    "ros2 topic list | grep sensor_pose",
+    "ros2 topic info /robot_a/sensor_pose --verbose",
+    "timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability reliable --once",
+    "ros2 launch course_bringup patrol.launch.py namespace:=robot_a subscriber_reliability:=best_effort record:=false",
+    "timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability best_effort --once",
+    "ros2 launch course_bringup patrol.launch.py namespace:=robot_a subscriber_reliability:=best_effort record:=true",
+    "ros2 bag info evidence/pr05/bag",
+    "cp evidence/pr05/bag/metadata.yaml evidence/pr05/bag-metadata.yaml",
+    "ros2 bag play evidence/pr05/bag --qos-profile-overrides-path config/qos-overrides.yaml",
+    "timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability best_effort --once"
+  ],
+  "tests": [{ "name": "test_flake8", "status": "passed" },
+    { "name": "test_pep257", "status": "passed" },
+    { "name": "test_copyright", "status": "skipped" }],
+  "defect": {
+    "reproducer": "Запустить turtlesim глобально в терминале A. В терминале B выполнить 'ros2 launch course_bringup patrol.launch.py namespace:=robot_a subscriber_reliability:=reliable record:=false'. В терминале C: 'ros2 topic list | grep sensor_pose' показывает /robot_a/sensor_pose (топик существует). 'ros2 topic info /robot_a/sensor_pose --verbose' показывает Publisher count: 1 с QoS BEST_EFFORT (нода pose_relay) и Subscription count: 1 с QoS RELIABLE (тестовый подписчик). 'timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability reliable --once' завершается по таймауту (exit=124), сообщения не приходят, хотя нода-издатель работает и публикует с частотой ~60 Гц.",
+    "root_cause": "DDS связывает publisher и subscriber не только по имени топика и типу сообщения, но и по совместимости QoS-профилей, в частности reliability. best_effort publisher не может обслужить reliable subscriber: DDS-совместимость нарушена, discovery видит оба endpoint’а в графе, но дата-связь не устанавливается. Это отличается от PR02/PR03, где проблема была в несовпадении имени топика: здесь имя и тип полностью совпадают, но доставки всё равно нет. Проверяется через 'ros2 topic info --verbose', который печатает QoS-профиль каждого endpoint’а: BEST_EFFORT vs RELIABLE — incompatible.",
+    "proof_after": "В терминале B перезапустить 'ros2 launch course_bringup patrol.launch.py namespace:=robot_a subscriber_reliability:=best_effort record:=false'. В терминале C: 'timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability best_effort --once' получает сообщение (exit=0) с полями Pose (x, y, theta). Профили совместимы — доставка есть. Далее: запись 'ros2 launch ... record:=true' в течение ~60 с даёт evidence/pr05/bag с 3837 сообщениями одного топика /robot_a/sensor_pose (Type: turtlesim/msg/Pose). Replay: 'ros2 bag play evidence/pr05/bag --qos-profile-overrides-path config/qos-overrides.yaml' с тем же best_effort QoS — сообщение снова доставлено. Файлы улик: evidence/pr05/qos-before.txt, evidence/pr05/qos-after.txt, evidence/pr05/bag-metadata.yaml."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true,
+    "replay_verified": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 6
+  },
+  "ai_used": false
+}
