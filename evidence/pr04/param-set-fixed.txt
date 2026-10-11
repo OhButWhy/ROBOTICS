@@ -1,0 +1,8 @@
+=== попытка publish_hz=0 при ВКЛЮЧЁННОЙ валидации ===
+--- до ---
+Double value is: 10.0
+--- set 0.0 ---
+Setting parameter failed: publish_hz=0.0 недопустимо
+--- после ---
+Double value is: 10.0
+--- topic hz (должен остаться прежним) ---

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR04",
+  "commit": "d1fe5463dfe230a6c2c726c7de40ef60bcbd6040",
+  "course_kit": {
+    "version": "v1-w04",
+    "archive_sha256": "bca214e3de6f90f9513049dfa0f36fee65ad834da502dc3f3f8fb443517b5197"
+  },
+  "commands": [
+    "source /opt/ros/jazzy/setup.bash && cd \"$(git rev-parse --show-toplevel)\"",
+    "colcon build --symlink-install --packages-select patrol",
+    "colcon test --packages-select patrol --event-handlers console_direct+",
+    "colcon test-result --verbose",
+    "ros2 run turtlesim turtlesim_node",
+    "ros2 run patrol patrol --ros-args -r cmd_vel:=/turtle1/cmd_vel",
+    "ros2 param list /patrol",
+    "ros2 param get /patrol publish_hz",
+    "ros2 param set /patrol publish_hz 5.0",
+    "timeout 5s ros2 topic hz /turtle1/cmd_vel",
+    "ros2 param set /patrol publish_hz 0.0",
+    "ros2 param get /patrol publish_hz",
+    "ros2 param set /patrol linear_speed 0.8",
+    "ros2 service call /clear std_srvs/srv/Empty",
+    "ros2 action list -t",
+    "ros2 action info /turtle1/rotate_absolute"
+  ],
+  "tests": [{ "name": "test_missing_pose_is_zero", "status": "passed" },
+  { "name": "test_normal_pose_uses_passed_speeds", "status": "passed" },
+  { "name": "test_normal_pose_with_other_speeds", "status": "passed" },
+  { "name": "test_copyright", "status": "skipped" },
+  { "name": "test_flake8", "status": "passed" },
+  { "name": "test_pep257", "status": "passed" },
+  { "name": "test_valid_values", "status": "passed" },
+  { "name": "test_out_of_range", "status": "passed" },
+  { "name": "test_nan_and_inf", "status": "passed" }],
+  "defect": {
+    "reproducer": "В ветке с временно отключённой проверкой частоты (callback _on_param_change без вызова validate_param) запустить ноду 'ros2 run patrol patrol --ros-args -r cmd_vel:=/turtle1/cmd_vel' и выполнить 'ros2 param set /patrol publish_hz 0.0'. Симптом: команда завершается успешно (Set parameter successful), параметр принимает значение 0.0, затем в _restart_timer происходит деление на ноль (1.0 / 0) — нода падает с ZeroDivisionError. 'ros2 node list' больше не содержит /patrol; 'ros2 topic hz /turtle1/cmd_vel' перестаёт получать сообщения; черепаха едет по инерции последней команды и постепенно останавливается.",
+    "root_cause": "Параметр publish_hz определяет период таймера как 1.0 / publish_hz. Без валидации значение 0.0 принимается и доходит до _restart_timer, где деление на ноль вызывает необработанное исключение в callback изменения параметров. Нода завершается, публикация в cmd_vel прекращается, DDS-участник удаляется из графа. Отказ воспроизводимый: одно и то же значение всегда даёт одно и то же падение. Механизм add_on_set_parameters_callback позволяет отклонить недопустимое значение ДО его применения — при возврате SetParametersResult(successful=False) параметр не меняется, активное состояние (таймер, публикация, текущая скорость) сохраняется.",
+    "proof_after": "Вернуть проверку в _on_param_change (for p in params: if not validate_param(p.name, p.value): return SetParametersResult(successful=False, reason=...)), пересобрать 'colcon build --symlink-install --packages-select patrol', перезапустить ноду. Тот же вызов 'ros2 param set /patrol publish_hz 0.0' возвращает 'Setting parameter failed: publish_hz=0.0 недопустимо'. Проверки: 'ros2 param get /patrol publish_hz' показывает прежнее значение (10.0); 'timeout 3s ros2 topic hz /turtle1/cmd_vel' даёт ~10 Гц — поток не изменился; 'ros2 node list' содержит /patrol. Допустимое изменение работает: 'ros2 param set /patrol publish_hz 5.0' → параметр = 5.0, topic hz ≈ 5 Гц. Файлы улик: evidence/pr04/param-set-broken.txt, evidence/pr04/param-set-fixed.txt, evidence/pr04/param-set-ok.txt, evidence/pr04/parameters.md."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 6
+  },
+  "ai_used": false
+}

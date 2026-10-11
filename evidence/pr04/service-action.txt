@@ -1,0 +1,14 @@
+=== сервисы ===
+/clear
+requester: making request: std_srvs.srv.Empty_Request()
+
+response:
+std_srvs.srv.Empty_Response()
+
+
+=== действия ===
+/turtle1/rotate_absolute [turtlesim/action/RotateAbsolute]
+Action: /turtle1/rotate_absolute
+Action clients: 0
+Action servers: 1
+    /turtlesim

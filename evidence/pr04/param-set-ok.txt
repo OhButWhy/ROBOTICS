@@ -1,0 +1,11 @@
+=== publish_hz 10 в 5 (при включённой валидации) ===
+--- до ---
+Double value is: 10.0
+Set parameter successful
+--- после ---
+Double value is: 5.0
+--- topic hz (ожидаем 5) ---
+average rate: 4.996
+	min: 0.199s max: 0.202s std dev: 0.00112s window: 7
+average rate: 4.996
+	min: 0.198s max: 0.202s std dev: 0.00127s window: 13
