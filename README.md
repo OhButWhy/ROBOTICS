@@ -181,3 +181,60 @@ ros2 topic info /cmd_vel --verbose
 ```
 
 Ремап `-r cmd_vel:=/turtle1/cmd_vel` связывает publisher с подписчиком.
+
+## PR04 — параметры ноды `patrol`
+
+Нода `patrol` получила три параметра, которыми можно менять поведение
+на ходу, без перезапуска:
+
+| Параметр | По умолчанию | Диапазон |
+|---|---|---|
+| `linear_speed` | 0.5 м/с | 0.0–1.0 |
+| `turn_rate` | 0.3 рад/с | −1.0–1.0 |
+| `publish_hz` | 10.0 Гц | 1.0–30.0 |
+
+Недопустимые значения (вне диапазона, NaN, ±inf) отклоняются с
+сохранением текущего состояния.
+
+### Сборка и тесты
+
+```bash
+source /opt/ros/jazzy/setup.bash
+cd "$(git rev-parse --show-toplevel)"
+colcon build --symlink-install --packages-select patrol
+colcon test  --packages-select patrol --event-handlers console_direct+
+colcon test-result --verbose
+```
+
+### Запуск
+
+Терминал A:
+
+```bash
+source install/setup.bash
+ros2 run turtlesim turtlesim_node
+```
+
+Терминал B:
+
+```bash
+source install/setup.bash
+ros2 run patrol patrol --ros-args -r cmd_vel:=/turtle1/cmd_vel
+```
+
+### Изменение параметров на ходу
+
+```bash
+ros2 param list /patrol
+ros2 param get  /patrol publish_hz
+ros2 param set  /patrol publish_hz 5.0     # частота упадёт до 5 Гц
+
+ros2 param set  /patrol publish_hz 0.0     # отклонено: значение вне диапазона
+ros2 param get  /patrol publish_hz         # всё ещё 5.0
+
+ros2 param set  /patrol linear_speed 0.8   # скорость вырастет
+```
+
+При смене `publish_hz` старый таймер останавливается и уничтожается,
+затем создаётся новый с периодом `1/publish_hz`. Двух одновременно
+работающих таймеров не остаётся.
