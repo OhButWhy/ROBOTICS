@@ -47,4 +47,4 @@ jobs:
           tar -xzf /tmp/course-kit.tar.gz -C .course-kit
 
       - name: Check PR04 evidence
-        run: python3 .course-kit/v1/tools/check_practice.py PR04 --submission .
+        run: python3 .course-kit/v1/tools/check_practice.py PR05 --submission .

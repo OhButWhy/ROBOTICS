@@ -238,3 +238,124 @@ ros2 param set  /patrol linear_speed 0.8   # скорость вырастет
 При смене `publish_hz` старый таймер останавливается и уничтожается,
 затем создаётся новый с периодом `1/publish_hz`. Двух одновременно
 работающих таймеров не остаётся.
+
+## PR05 — launch с аргументами, namespace и записью MCAP
+
+Одна launch-команда поднимает систему в пространстве имён `/robot_a`,
+ретранслирует `/turtle1/pose` в `/robot_a/sensor_pose` с QoS
+best_effort и (опционально) пишет поток в MCAP. Демонстрируется
+несовместимость QoS: reliable-подписчик не получает best_effort-поток.
+
+### Состав
+
+| Компонент | Роль |
+|---|---|
+| `course_bringup` | пакет с launch-файлами |
+| `pose_relay` | нода: `/turtle1/pose` → `sensor_pose` (best_effort) |
+| `patrol.launch.py` | запускает `pose_relay` + опциональный `ros2 bag record` |
+| `config/qos-overrides.yaml` | профиль QoS для replay |
+
+### Сборка
+
+```bash
+source /opt/ros/jazzy/setup.bash
+cd "$(git rev-parse --show-toplevel)"
+colcon build --symlink-install --packages-select course_bringup
+colcon test  --packages-select course_bringup --event-handlers console_direct+
+colcon test-result --verbose
+```
+
+### Запуск
+
+Терминал A — turtlesim глобально:
+
+```bash
+source install/setup.bash
+ros2 run turtlesim turtlesim_node
+```
+
+Терминал B — launch (без записи):
+
+```bash
+source install/setup.bash
+ros2 launch course_bringup patrol.launch.py \
+  namespace:=robot_a subscriber_reliability:=best_effort record:=false
+```
+
+Терминал C — проверка доставки:
+
+```bash
+ros2 topic echo /robot_a/sensor_pose \
+  --qos-reliability best_effort --once
+```
+
+Ожидаемый результат: сообщение приходит.
+
+### Демонстрация QoS-разрыва
+
+Терминал B — перезапуск с reliable-подписчиком:
+
+```bash
+ros2 launch course_bringup patrol.launch.py \
+  namespace:=robot_a subscriber_reliability:=reliable record:=false
+```
+
+Терминал C — проверка:
+
+```bash
+ros2 topic list | grep sensor_pose
+# /robot_a/sensor_pose    ← топик виден
+
+ros2 topic info /robot_a/sensor_pose --verbose
+# Publisher count: 1     QoS: BEST_EFFORT
+# Subscription count: 1  QoS: RELIABLE    ← несовместимо
+
+timeout 3s ros2 topic echo /robot_a/sensor_pose \
+  --qos-reliability reliable --once
+# завершается по timeout, сообщений нет
+```
+
+### Запись в MCAP
+
+Терминал B:
+
+```bash
+ros2 launch course_bringup patrol.launch.py \
+  namespace:=robot_a subscriber_reliability:=best_effort record:=true
+```
+
+Через 10–20 секунд — `Ctrl+C`. Запись окажется в `evidence/pr05/bag/`.
+
+Проверка:
+
+```bash
+ros2 bag info evidence/pr05/bag
+# Topic: /robot_a/sensor_pose | Type: turtlesim/msg/Pose | Count: N
+```
+
+### Replay с QoS-override
+
+Терминал B:
+
+```bash
+ros2 bag play evidence/pr05/bag \
+  --qos-profile-overrides-path config/qos-overrides.yaml
+```
+
+Терминал C:
+
+```bash
+timeout 3s ros2 topic echo /robot_a/sensor_pose \
+  --qos-reliability best_effort --once
+```
+
+Сообщение приходит — значит, тот же QoS, что на живом потоке, работает и на записи.
+
+### Ключевой момент
+
+`add_on_set_parameters_callback` из PR04 в этой работе не используется; здесь
+важно, что **QoS publisher’а и subscriber’а должны совпадать по reliability**.
+best_effort publisher не может обслужить reliable subscriber — discovery
+видит оба endpoint’а, но DDS не связывает их. Это отличается от PR02/PR03,
+где конфликт был в имени топика: здесь имя и тип совпадают, а поток всё
+равно не идёт.
