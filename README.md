@@ -359,3 +359,8 @@ best_effort publisher не может обслужить reliable subscriber —
 видит оба endpoint’а, но DDS не связывает их. Это отличается от PR02/PR03,
 где конфликт был в имени топика: здесь имя и тип совпадают, а поток всё
 равно не идёт.
+
+## PR06 — URDF-модель и tf2
+Пакет `course_description` содержит параметризованную модель Ackermann-робота (`vehicle.urdf.xacro`).
+Запуск визуализации: `ros2 launch course_description display.launch.py` (Fixed Frame = `base_link`).
+Проверка: `check_urdf` и тесты пакета.
