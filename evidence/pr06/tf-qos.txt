@@ -1,0 +1,85 @@
+## topic info /tf_static
+
+Type: tf2_msgs/msg/TFMessage
+
+Publisher count: 1
+
+Node name: robot_state_publisher
+Node namespace: /
+Topic type: tf2_msgs/msg/TFMessage
+Endpoint type: PUBLISHER
+GID: 01.0f.15.62.8b.06.a1.4c.00.00.00.00.00.00.13.03
+QoS profile:
+  Reliability: RELIABLE
+  History (Depth): UNKNOWN
+  Durability: TRANSIENT_LOCAL
+  Lifespan: Infinite
+  Deadline: Infinite
+  Liveliness: AUTOMATIC
+  Liveliness lease duration: Infinite
+
+Subscription count: 0
+
+## echo transient_local
+
+transforms:
+- header:
+    stamp:
+      sec: 1792736500
+      nanosec: 367474464
+    frame_id: base_link
+  child_frame_id: camera_link
+  transform:
+    translation:
+      x: 0.4
+      y: 0.0
+      z: 0.25
+    rotation:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      w: 1.0
+- header:
+    stamp:
+      sec: 1792736500
+      nanosec: 367474464
+    frame_id: base_link
+  child_frame_id: imu_link
+  transform:
+    translation:
+      x: 0.0
+      y: 0.0
+      z: 0.12
+    rotation:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      w: 1.0
+- header:
+    stamp:
+      sec: 1792736500
+      nanosec: 367474464
+    frame_id: base_link
+  child_frame_id: lidar_link
+  transform:
+    translation:
+      x: 0.0
+      y: 0.0
+      z: 0.31
+    rotation:
+      x: 0.0
+      y: 0.0
+      z: 0.0
+      w: 1.0
+---
+exit=0
+
+## echo volatile
+
+exit=124
+
+## Чем /tf_static отличается от /tf
+
+/tf_static использует QoS TRANSIENT_LOCAL: издатель хранит последнее опубликованное сообщение и отдаёт его любому подписчику, который подключится позже. Это полностью согласуется с природой данных — фиксированные соединения (камера, лидар, IMU) не меняются во времени, публикуются один раз при старте, и любой опоздавший узел (например, RViz) должен сразу узнать их координаты.
+
+/tf использует QoS VOLATILE: прошлые сообщения не сохраняются, новый подписчик получает только те трансформации, которые публикуются с момента его подключения. Это согласуется с природой подвижных соединений (колёса, одометрия) — они обновляются с высокой частотой, и хранить их историю в буфере бессмысленно, так как старая трансформация уже неактуальна.
