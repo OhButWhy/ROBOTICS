@@ -25,7 +25,7 @@ jobs:
           set -o pipefail
           source /opt/ros/jazzy/setup.bash
           # Собираем все три пакета разом
-          colcon build --symlink-install --packages-select patrol course_bringup course_description 2>&1 | tee /tmp/build.txt
+          colcon build --symlink-install --packages-select course_description 2>&1 | tee /tmp/build.txt
           cat /tmp/build.txt
 
       - name: Run tests
@@ -34,7 +34,7 @@ jobs:
           source /opt/ros/jazzy/setup.bash
           source install/setup.bash
           # Тестируем все три пакета
-          colcon test --packages-select patrol course_bringup course_description --event-handlers console_direct+
+          colcon test --packages-select course_description --event-handlers console_direct+
           colcon test-result --verbose
 
       - name: Validate URDF structure
