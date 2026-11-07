@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR06",
+  "commit": "0f8354f77c279dcc6dc35ae0280555274b0d6561",
+  "course_kit": {
+    "version": "v1-w09",
+    "archive_sha256": "8579e0afe96d76220735b6019cc38b1f3cac8c21e4aae8470785138a74a6c54a"
+  },
+  "commands": [
+    "colcon build --symlink-install --packages-select course_description",
+    "xacro src/course_description/urdf/vehicle.urdf.xacro > /tmp/vehicle.urdf",
+    "check_urdf /tmp/vehicle.urdf",
+    "colcon test --packages-select course_description --event-handlers console_direct+",
+    "colcon test-result --verbose",
+    "ros2 launch course_description display.launch.py",
+    "ros2 topic info /tf_static --verbose",
+    "timeout 4s ros2 topic echo /tf_static --once --qos-durability transient_local --qos-reliability reliable",
+    "timeout 4s ros2 topic echo /tf_static --once --qos-durability volatile --qos-reliability reliable",
+    "ros2 run tf2_ros tf2_echo base_link lidar_link",
+    "ros2 run tf2_tools view_frames"
+  ],
+  "tests": [
+    { "name": "test_lidar_parent_is_base_link", "status": "passed" },
+    { "name": "test_camera_parent_is_base_link", "status": "passed" },
+    { "name": "test_imu_parent_is_base_link", "status": "passed" },
+    { "name": "test_all_links_present", "status": "passed" },
+    { "name": "test_flake8", "status": "passed" },
+    { "name": "test_pep257", "status": "passed" },
+    { "name": "test_copyright", "status": "skipped" }
+  ],
+  "defect": {
+    "reproducer": "В файле vehicle.urdf.xacro у lidar_joint изменить parent с base_link на camera_link, сохранив прежний offset. При визуализации в RViz лидар смещается вперед и вверх (в позицию камеры). Команда check_urdf /tmp/broken.urdf успешно парсит модель, так как дерево остается связным. Однако тест colcon test падает: 'AssertionError: lidar_link должен крепиться к base_link, но parent = camera_link'.",
+    "root_cause": "check_urdf проверяет только структурную корректность (отсутствие циклов, валидный XML, существование ссылок), но не семантику. Смена parent сохраняет валидное дерево, однако меняет топологию: offset лидара теперь применяется относительно camera_link. Структурная корректность не доказывает геометрическую правильность. Для отлова таких ошибок написан собственный тест, проверяющий конкретного ожидаемого родителя.",
+    "proof_after": "Вернуть parent=lidar_joint=base_link, пересобрать пакет и запустить тесты. Тест test_lidar_parent_is_base_link снова проходит (PASSED). Визуализация в RViz и tf2_echo base_link lidar_link подтверждают правильное расположение лидара: Translation [0.000, 0.000, 0.310]. Улики: evidence/pr06/model-check.txt, evidence/pr06/frames.md."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 6
+  },
+  "ai_used": false
+}

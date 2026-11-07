@@ -1,0 +1,231 @@
+robot name is: course_ackermann
+---------- Successfully Parsed XML ---------------
+root Link: base_link has 7 child(ren)
+    child(1):  camera_link
+    child(2):  front_left_knuckle
+        child(1):  front_left_wheel
+    child(3):  front_right_knuckle
+        child(1):  front_right_wheel
+    child(4):  imu_link
+    child(5):  lidar_link
+    child(6):  rear_left_wheel
+    child(7):  rear_right_wheel
+Starting >>> course_description
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+cachedir: /home/naskok/robotics_ws/build/course_description/.pytest_cache
+rootdir: /home/naskok/robotics_ws/src/course_description
+plugins: launch-testing-3.4.11, ament-flake8-0.17.5, ament-xmllint-0.17.5, ament-copyright-0.17.5, launch-testing-ros-0.26.12, ament-pep257-0.17.5, ament-lint-0.17.5, cov-4.1.0, colcon-core-0.21.1
+collected 7 items
+
+test/test_copyright.py s                                                 [ 14%]
+test/test_flake8.py F                                                    [ 28%]
+test/test_pep257.py .                                                    [ 42%]
+test/test_urdf.py ...F                                                   [100%]
+
+=================================== FAILURES ===================================
+_________________________________ test_flake8 __________________________________
+test/test_flake8.py:23: in test_flake8
+    assert rc == 0, \
+E   AssertionError: Found 11 code style errors / warnings:
+E     ./launch/display.launch.py:2:1: I201 Missing newline between import groups. 'from ament_index_python.packages import get_package_share_directory' is identified as Third Party and 'import os' is identified as Stdlib.
+E     ./launch/display.launch.py:5:1: I101 Imported names are in the wrong order. Should be Command, LaunchConfiguration
+E     ./launch/display.launch.py:5:1: F401 'launch.substitutions.LaunchConfiguration' imported but unused
+E     ./setup.py:2:1: I201 Missing newline between import groups. 'from setuptools import find_packages, setup' is identified as Third Party and 'from glob import glob' is identified as Stdlib.
+E     ./setup.py:12:5: W191 indentation contains tabs
+E     ./setup.py:12:5: E101 indentation contains mixed spaces and tabs
+E     ./setup.py:13:5: W191 indentation contains tabs
+E     ./setup.py:13:5: E101 indentation contains mixed spaces and tabs
+E     ./setup.py:14:5: W191 indentation contains tabs
+E     ./setup.py:14:5: E101 indentation contains mixed spaces and tabs
+E     ./test/test_urdf.py:3:1: I100 Import statements are in the wrong order. 'from pathlib import Path' should be before 'import xml.etree.ElementTree'
+E   assert 1 == 0
+----------------------------- Captured stdout call -----------------------------
+
+./launch/display.launch.py:2:1: I201 Missing newline between import groups. 'from ament_index_python.packages import get_package_share_directory' is identified as Third Party and 'import os' is identified as Stdlib.
+from ament_index_python.packages import get_package_share_directory
+^
+
+./launch/display.launch.py:5:1: I101 Imported names are in the wrong order. Should be Command, LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, Command
+^
+
+./launch/display.launch.py:5:1: F401 'launch.substitutions.LaunchConfiguration' imported but unused
+from launch.substitutions import LaunchConfiguration, Command
+^
+
+./setup.py:2:1: I201 Missing newline between import groups. 'from setuptools import find_packages, setup' is identified as Third Party and 'from glob import glob' is identified as Stdlib.
+from setuptools import find_packages, setup
+^
+
+./setup.py:12:5: W191 indentation contains tabs
+    	('share/' + package_name, ['package.xml']),
+    ^
+
+./setup.py:12:5: E101 indentation contains mixed spaces and tabs
+    	('share/' + package_name, ['package.xml']),
+    ^
+
+./setup.py:13:5: W191 indentation contains tabs
+    	('share/' + package_name + '/urdf', glob('urdf/*.xacro')),
+    ^
+
+./setup.py:13:5: E101 indentation contains mixed spaces and tabs
+    	('share/' + package_name + '/urdf', glob('urdf/*.xacro')),
+    ^
+
+./setup.py:14:5: W191 indentation contains tabs
+    	('share/' + package_name + '/launch', glob('launch/*.launch.py')),
+    ^
+
+./setup.py:14:5: E101 indentation contains mixed spaces and tabs
+    	('share/' + package_name + '/launch', glob('launch/*.launch.py')),
+    ^
+
+./test/test_urdf.py:3:1: I100 Import statements are in the wrong order. 'from pathlib import Path' should be before 'import xml.etree.ElementTree'
+from pathlib import Path
+^
+
+3     E101 indentation contains mixed spaces and tabs
+1     F401 'launch.substitutions.LaunchConfiguration' imported but unused
+1     I100 Import statements are in the wrong order. 'from pathlib import Path' should be before 'import xml.etree.ElementTree'
+1     I101 Imported names are in the wrong order. Should be Command, LaunchConfiguration
+2     I201 Missing newline between import groups. 'from ament_index_python.packages import get_package_share_directory' is identified as Third Party and 'import os' is identified as Stdlib.
+3     W191 indentation contains tabs
+
+7 files checked
+11 errors
+
+'E'-type errors: 3
+'F'-type errors: 1
+'I'-type errors: 4
+'W'-type errors: 3
+
+Checked files:
+
+* ./setup.py
+* ./test/test_pep257.py
+* ./test/test_copyright.py
+* ./test/test_urdf.py
+* ./test/test_flake8.py
+* ./launch/display.launch.py
+* ./course_description/__init__.py
+____________________________ test_all_links_present ____________________________
+test/test_urdf.py:56: in test_all_links_present
+    assert expected in links, f'отсутствует звено {expected}'
+E   AssertionError: отсутствует звено front_left_link
+E   assert 'front_left_link' in {'base_link', 'camera_link', 'front_left_knuckle', 'front_left_wheel', 'front_right_knuckle', 'front_right_wheel', ...}
+- generated xml file: /home/naskok/robotics_ws/build/course_description/pytest.xml -
+=========================== short test summary info ============================
+FAILED test/test_flake8.py::test_flake8 - AssertionError: Found 11 code style...
+FAILED test/test_urdf.py::test_all_links_present - AssertionError: отсутствуе...
+==================== 2 failed, 4 passed, 1 skipped in 1.06s ====================
+Finished <<< course_description [2.24s]	[ with test failures ]
+
+Summary: 1 package finished [2.64s]
+  1 package had test failures: course_description
+build/course_description/pytest.xml: 7 tests, 0 errors, 2 failures, 1 skipped
+- course_description.test.test_flake8 test_flake8
+  <<< failure message
+    AssertionError: Found 11 code style errors / warnings:
+      ./launch/display.launch.py:2:1: I201 Missing newline between import groups. 'from ament_index_python.packages import get_package_share_directory' is identified as Third Party and 'import os' is identified as Stdlib.
+      ./launch/display.launch.py:5:1: I101 Imported names are in the wrong order. Should be Command, LaunchConfiguration
+      ./launch/display.launch.py:5:1: F401 'launch.substitutions.LaunchConfiguration' imported but unused
+      ./setup.py:2:1: I201 Missing newline between import groups. 'from setuptools import find_packages, setup' is identified as Third Party and 'from glob import glob' is identified as Stdlib.
+      ./setup.py:12:5: W191 indentation contains tabs
+      ./setup.py:12:5: E101 indentation contains mixed spaces and tabs
+      ./setup.py:13:5: W191 indentation contains tabs
+      ./setup.py:13:5: E101 indentation contains mixed spaces and tabs
+      ./setup.py:14:5: W191 indentation contains tabs
+      ./setup.py:14:5: E101 indentation contains mixed spaces and tabs
+      ./test/test_urdf.py:3:1: I100 Import statements are in the wrong order. 'from pathlib import Path' should be before 'import xml.etree.ElementTree'
+    assert 1 == 0
+  >>>
+- course_description.test.test_urdf test_all_links_present
+  <<< failure message
+    AssertionError: отсутствует звено front_left_link
+    assert 'front_left_link' in {'base_link', 'camera_link', 'front_left_knuckle', 'front_left_wheel', 'front_right_knuckle', 'front_right_wheel', ...}
+  >>>
+
+Summary: 16 tests, 0 errors, 2 failures, 2 skipped
+Starting >>> course_description
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+cachedir: /home/naskok/robotics_ws/build/course_description/.pytest_cache
+rootdir: /home/naskok/robotics_ws/src/course_description
+plugins: launch-testing-3.4.11, ament-flake8-0.17.5, ament-xmllint-0.17.5, ament-copyright-0.17.5, launch-testing-ros-0.26.12, ament-pep257-0.17.5, ament-lint-0.17.5, cov-4.1.0, colcon-core-0.21.1
+collected 7 items
+
+test/test_copyright.py s                                                 [ 14%]
+test/test_flake8.py F                                                    [ 28%]
+test/test_pep257.py .                                                    [ 42%]
+test/test_urdf.py ....                                                   [100%]
+
+=================================== FAILURES ===================================
+_________________________________ test_flake8 __________________________________
+test/test_flake8.py:23: in test_flake8
+    assert rc == 0, \
+E   AssertionError: Found 1 code style errors / warnings:
+E     ./setup.py:2:1: I201 Missing newline between import groups. 'from setuptools import find_packages, setup' is identified as Third Party and 'from glob import glob' is identified as Stdlib.
+E   assert 1 == 0
+----------------------------- Captured stdout call -----------------------------
+
+./setup.py:2:1: I201 Missing newline between import groups. 'from setuptools import find_packages, setup' is identified as Third Party and 'from glob import glob' is identified as Stdlib.
+from setuptools import find_packages, setup
+^
+
+1     I201 Missing newline between import groups. 'from setuptools import find_packages, setup' is identified as Third Party and 'from glob import glob' is identified as Stdlib.
+
+7 files checked
+1 errors
+
+'I'-type errors: 1
+
+Checked files:
+
+* ./setup.py
+* ./test/test_pep257.py
+* ./test/test_copyright.py
+* ./test/test_urdf.py
+* ./test/test_flake8.py
+* ./launch/display.launch.py
+* ./course_description/__init__.py
+- generated xml file: /home/naskok/robotics_ws/build/course_description/pytest.xml -
+=========================== short test summary info ============================
+FAILED test/test_flake8.py::test_flake8 - AssertionError: Found 1 code style ...
+==================== 1 failed, 5 passed, 1 skipped in 0.56s ====================
+Finished <<< course_description [2.13s]	[ with test failures ]
+
+Summary: 1 package finished [2.39s]
+  1 package had test failures: course_description
+Starting >>> course_description
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0
+cachedir: /home/naskok/robotics_ws/build/course_description/.pytest_cache
+rootdir: /home/naskok/robotics_ws/src/course_description
+plugins: launch-testing-3.4.11, ament-flake8-0.17.5, ament-xmllint-0.17.5, ament-copyright-0.17.5, launch-testing-ros-0.26.12, ament-pep257-0.17.5, ament-lint-0.17.5, cov-4.1.0, colcon-core-0.21.1
+collected 7 items
+
+test/test_copyright.py s                                                 [ 14%]
+test/test_flake8.py .                                                    [ 28%]
+test/test_pep257.py .                                                    [ 42%]
+test/test_urdf.py ....                                                   [100%]
+
+- generated xml file: /home/naskok/robotics_ws/build/course_description/pytest.xml -
+========================= 6 passed, 1 skipped in 0.44s =========================
+Finished <<< course_description [2.00s]
+
+Summary: 1 package finished [2.25s]
+Summary: 16 tests, 0 errors, 0 failures, 2 skipped
+robot name is: course_ackermann
+---------- Successfully Parsed XML ---------------
+root Link: base_link has 7 child(ren)
+    child(1):  camera_link
+    child(2):  front_left_knuckle
+        child(1):  front_left_wheel
+    child(3):  front_right_knuckle
+        child(1):  front_right_wheel
+    child(4):  imu_link
+    child(5):  lidar_link
+    child(6):  rear_left_wheel
+    child(7):  rear_right_wheel

@@ -19,26 +19,37 @@ jobs:
           apt-get install -y python3-colcon-common-extensions python3-pip
           pip3 install --break-system-packages -q catkin_pkg empy==3.3.4 lark
 
-      - name: Build patrol
+      - name: Build packages
         shell: bash
         run: |
           set -o pipefail
           source /opt/ros/jazzy/setup.bash
-          colcon build --symlink-install --packages-select patrol 2>&1 | tee /tmp/build-patrol.txt
-          cat /tmp/build-patrol.txt
+          # Собираем все три пакета разом
+          colcon build --symlink-install --packages-select patrol course_bringup course_description 2>&1 | tee /tmp/build.txt
+          cat /tmp/build.txt
 
-      - name: Test patrol
+      - name: Run tests
         shell: bash
         run: |
           source /opt/ros/jazzy/setup.bash
           source install/setup.bash
-          colcon test --packages-select patrol --event-handlers console_direct+
+          # Тестируем все три пакета
+          colcon test --packages-select patrol course_bringup course_description --event-handlers console_direct+
           colcon test-result --verbose
+
+      - name: Validate URDF structure
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source install/setup.bash
+          # Разворачиваем Xacro в URDF и проверяем, что дерево связное
+          xacro src/course_description/urdf/vehicle.urdf.xacro > /tmp/vehicle.urdf
+          check_urdf /tmp/vehicle.urdf
 
       - name: Download course kit
         env:
-          COURSE_KIT_URL: https://ros.lms.ci.nsu.ru/downloads/robotics-course-kit-v1-w05-bca214e3de6f.tar.gz
-          COURSE_KIT_SHA256: bca214e3de6f90f9513049dfa0f36fee65ad834da502dc3f3f8fb443517b5197
+          COURSE_KIT_URL: https://ros.lms.ci.nsu.ru/downloads/robotics-course-kit-v1-w09-8579e0afe96d.tar.gz
+          COURSE_KIT_SHA256: 8579e0afe96d76220735b6019cc38b1f3cac8c21e4aae8470785138a74a6c54a
         shell: bash
         run: |
           curl -fsSLo /tmp/course-kit.tar.gz "$COURSE_KIT_URL"
@@ -46,5 +57,6 @@ jobs:
           mkdir -p .course-kit
           tar -xzf /tmp/course-kit.tar.gz -C .course-kit
 
-      - name: Check PR04 evidence
-        run: python3 .course-kit/v1/tools/check_practice.py PR05 --submission .
+      - name: Check PR06 evidence
+        shell: bash
+        run: python3 .course-kit/v1/tools/check_practice.py PR06 --submission .
