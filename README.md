@@ -420,3 +420,12 @@ ros2 bag record --storage mcap --use-sim-time -o fixtures/pr07-sensors \
 ```
 
 **Важно:** папка `fixtures/` и файлы `*.mcap` добавлены в `.gitignore`, так как запись весит сотни мегабайт.
+
+## PR08 — Локализация AMCL
+Пакет `localization_case` запускает `map_server` и `amcl` для локализации робота на записи `fixtures/pr07-sensors`.
+
+### Запуск
+```bash
+ros2 launch localization_case localization.launch.py \
+  params_file:=$PWD/src/localization_case/config/amcl.yaml \
+  map:=$PWD/.course-kit/v1/fixtures/pr08/map.yaml

@@ -12,39 +12,31 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install build tools
+      - name: Install build tools and Nav2 dependencies
         shell: bash
         run: |
           apt-get update
-          apt-get install -y python3-colcon-common-extensions python3-pip
+          apt-get install -y python3-colcon-common-extensions python3-pip \
+            ros-jazzy-nav2-amcl ros-jazzy-nav2-map-server \
+            ros-jazzy-nav2-lifecycle-manager ros-jazzy-tf2-ros-py \
+            ros-jazzy-tf2-tools
           pip3 install --break-system-packages -q catkin_pkg empy==3.3.4 lark
 
-      - name: Build packages
+      - name: Build localization_case
         shell: bash
         run: |
           set -o pipefail
           source /opt/ros/jazzy/setup.bash
-          # Собираем все три пакета разом
-          colcon build --symlink-install --packages-select course_description 2>&1 | tee /tmp/build.txt
+          colcon build --symlink-install --packages-select localization_case 2>&1 | tee /tmp/build.txt
           cat /tmp/build.txt
 
-      - name: Run tests
+      - name: Test localization_case
         shell: bash
         run: |
           source /opt/ros/jazzy/setup.bash
           source install/setup.bash
-          # Тестируем все три пакета
-          colcon test --packages-select course_description --event-handlers console_direct+
+          colcon test --packages-select localization_case --event-handlers console_direct+
           colcon test-result --verbose
-
-      - name: Validate URDF structure
-        shell: bash
-        run: |
-          source /opt/ros/jazzy/setup.bash
-          source install/setup.bash
-          # Разворачиваем Xacro в URDF и проверяем, что дерево связное
-          xacro src/course_description/urdf/vehicle.urdf.xacro > /tmp/vehicle.urdf
-          check_urdf /tmp/vehicle.urdf
 
       - name: Download course kit
         env:
@@ -57,6 +49,6 @@ jobs:
           mkdir -p .course-kit
           tar -xzf /tmp/course-kit.tar.gz -C .course-kit
 
-      - name: Check PR07 evidence
+      - name: Check PR08 evidence
         shell: bash
-        run: python3 .course-kit/v1/tools/check_practice.py PR07 --submission .
+        run: python3 .course-kit/v1/tools/check_practice.py PR08 --submission .
