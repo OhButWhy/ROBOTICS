@@ -1,0 +1,41 @@
+{
+  "sensors": [
+    {
+      "topic": "/vehicle/camera/image_raw",
+      "type": "sensor_msgs/msg/Image",
+      "frame_id": "camera_link",
+      "time_source": "simulation",
+      "nominal_rate_hz": 20.0,
+      "measured_rate_hz": 20.0
+    },
+    {
+      "topic": "/vehicle/scan",
+      "type": "sensor_msgs/msg/LaserScan",
+      "frame_id": "lidar_link",
+      "time_source": "simulation",
+      "nominal_rate_hz": 10.0,
+      "measured_rate_hz": 10.0
+    },
+    {
+      "topic": "/vehicle/imu",
+      "type": "sensor_msgs/msg/Imu",
+      "frame_id": "imu_link",
+      "time_source": "simulation",
+      "nominal_rate_hz": 100.0,
+      "measured_rate_hz": 100.0
+    },
+    {
+      "topic": "/vehicle/odom",
+      "type": "nav_msgs/msg/Odometry",
+      "frame_id": "odom",
+      "child_frame_id": "base_link",
+      "time_source": "simulation",
+      "nominal_rate_hz": 50.0,
+      "measured_rate_hz": 50.0,
+      "original_frames": {
+        "frame_id": "course_ackermann/odom",
+        "child_frame_id": "course_ackermann/base_link"
+      }
+    }
+  ]
+}

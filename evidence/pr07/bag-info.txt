@@ -1,0 +1,18 @@
+
+Files:             pr07-sensors_0.mcap
+Bag size:          546.1 MiB
+Storage id:        mcap
+ROS Distro:        jazzy
+Duration:          40.955000000s
+Start:             Jan  1 1970 07:01:56.725000000 (116.725000000)
+End:               Jan  1 1970 07:02:37.680000000 (157.680000000)
+Messages:          50269
+Topic information: Topic: /clock | Type: rosgraph_msgs/msg/Clock | Count: 40956 | Serialization Format: cdr
+                   Topic: /tf | Type: tf2_msgs/msg/TFMessage | Count: 1997 | Serialization Format: cdr
+                   Topic: /tf_static | Type: tf2_msgs/msg/TFMessage | Count: 1 | Serialization Format: cdr
+                   Topic: /vehicle/camera/image_raw | Type: sensor_msgs/msg/Image | Count: 818 | Serialization Format: cdr
+                   Topic: /vehicle/imu | Type: sensor_msgs/msg/Imu | Count: 4094 | Serialization Format: cdr
+                   Topic: /vehicle/odom | Type: nav_msgs/msg/Odometry | Count: 1994 | Serialization Format: cdr
+                   Topic: /vehicle/scan | Type: sensor_msgs/msg/LaserScan | Count: 409 | Serialization Format: cdr
+Service:           0
+Service information: 

@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR07",
+  "commit": "273b6aae3bf919b06b67b8fa3fe6583285cbad7b",
+  "course_kit": {
+    "version": "v1-w11",
+    "archive_sha256": "0b67bfd41448549d21122124b7f49211ba2cd068cc56751871f319eadeb9d0ab"
+  },
+  "commands": [
+    "colcon build --symlink-install --packages-select course_description course_simulation",
+    "ros2 launch course_simulation simulation.launch.py headless:=true",
+    "ros2 topic echo /clock --once",
+    "ros2 topic pub -r 10 /drive/safe ackermann_msgs/msg/AckermannDriveStamped '{header: auto, drive: {speed: 1.0, steering_angle: 0.0}}'",
+    "ros2 topic echo /vehicle/gz_cmd_vel --once",
+    "ros2 topic echo /vehicle/odom --once",
+    "ros2 run tf2_ros tf2_echo odom base_link",
+    "ros2 bag record --storage mcap --use-sim-time -o fixtures/pr07-sensors --topics /vehicle/camera/image_raw /vehicle/scan /vehicle/imu /vehicle/odom /tf /tf_static /clock",
+    "ros2 bag info fixtures/pr07-sensors"
+  ],
+  "tests": [
+    { "name": "test_straight_drive", "status": "passed" },
+    { "name": "test_turning", "status": "passed" },
+    { "name": "test_zero_speed", "status": "passed" },
+    { "name": "test_nan_values", "status": "passed" },
+    { "name": "test_clamping", "status": "passed" },
+    { "name": "test_flake8", "status": "passed" },
+    { "name": "test_pep257", "status": "passed" },
+    { "name": "test_copyright", "status": "skipped" }
+  ],
+  "defect": {
+    "reproducer": "В файле bridge.yaml намеренно изменен gz_topic_name для IMU (например, на /vehicle/imu_broken). При запуске симуляции и проверке ros2 topic hz /vehicle/imu, частота равна 0 (данных нет), хотя в Gazebo топик gz topic -e -t /vehicle/imu продолжает публиковать сообщения.",
+    "root_cause": "Мост ros_gz_bridge сопоставляет топики по точному совпадению имен в YAML-конфигурации. Если gz_topic_name не совпадает с тем, что публикует плагин в SDF, мост не создает канал передачи данных. При этом ROS-топик может отображаться в ros2 topic list (как пустой), но сообщений из Gazebo в него не поступает.",
+    "proof_after": "Ошибка в bridge.yaml исправлена (возвращено имя /vehicle/imu). После пересборки и запуска ros2 topic hz /vehicle/imu показывает ~100 Гц, а ros2 topic echo отображает корректные данные. Одометрия и координата x в /vehicle/odom изменяются при подаче команды на /drive/safe, что доказывает прохождение пути: /drive/safe -> ackermann_adapter -> /vehicle/gz_cmd_vel -> bridge -> Gazebo."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true,
+    "headless_verified": true,
+    "recording_verified": true,
+    "odometry_tf_owned": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 6
+  },
+  "ai_used": false
+}
