@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR08",
+  "commit": "d448d5adec90137740237cab9674c851c3f2bc5e",
+  "course_kit": {
+    "version": "v1-w11",
+    "archive_sha256": "0b67bfd41448549d21122124b7f49211ba2cd068cc56751871f319eadeb9d0ab"
+  },
+  "commands": [
+    "ros2 launch localization_case localization.launch.py params_file:=$PWD/src/localization_case/config/amcl.yaml map:=$PWD/.course-kit/v1/fixtures/pr08/map.yaml",
+    "ros2 run localization_case measure.py",
+    "ros2 bag play fixtures/pr07-sensors",
+    "ros2 run tf2_ros tf2_echo map odom --ros-args -p use_sim_time:=true"
+  ],
+  "tests": [],
+  "defect": {
+    "reproducer": "В файле amcl-defect.yaml установлен base_frame_id: chassis. При запуске локализации и проигрывании bag'а, AMCL выдает ошибку 'Couldn't transform from lidar_link to chassis', так как такого фрейма нет в записи. Робот не локализуется.",
+    "root_cause": "AMCL ожидает цепочку TF до фрейма chassis, но адаптер одометрии из ПР07 публикует base_link. Разрыв TF-дерева не позволяет спроецировать лидар и обновить позу.",
+    "proof_after": "Возврат base_frame_id: base_link в amcl.yaml. Цепочка map->odom->base_link->lidar_link связна. Доступность map->odom = 1.0 (200/200), медиана ковариации = 0.117."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 2.5
+  },
+  "ai_used": false
+}
