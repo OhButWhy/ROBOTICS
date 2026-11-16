@@ -4,6 +4,8 @@ install/
 .course-kit/
 robotics-course-kit-*.tar.gz
 course-kit.tar.gz
+fixtures/
+*.mcap
 robotics-course-kit-*.sha256.txt
 __pycache__/
 *.pyc

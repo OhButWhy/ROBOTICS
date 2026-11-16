@@ -48,8 +48,8 @@ jobs:
 
       - name: Download course kit
         env:
-          COURSE_KIT_URL: https://ros.lms.ci.nsu.ru/downloads/robotics-course-kit-v1-w09-8579e0afe96d.tar.gz
-          COURSE_KIT_SHA256: 8579e0afe96d76220735b6019cc38b1f3cac8c21e4aae8470785138a74a6c54a
+          COURSE_KIT_URL: https://ros.lms.ci.nsu.ru/downloads/robotics-course-kit-v1-w11-0b67bfd41448.tar.gz
+          COURSE_KIT_SHA256: 0b67bfd41448549d21122124b7f49211ba2cd068cc56751871f319eadeb9d0ab
         shell: bash
         run: |
           curl -fsSLo /tmp/course-kit.tar.gz "$COURSE_KIT_URL"
@@ -57,6 +57,6 @@ jobs:
           mkdir -p .course-kit
           tar -xzf /tmp/course-kit.tar.gz -C .course-kit
 
-      - name: Check PR06 evidence
+      - name: Check PR07 evidence
         shell: bash
-        run: python3 .course-kit/v1/tools/check_practice.py PR06 --submission .
+        run: python3 .course-kit/v1/tools/check_practice.py PR07 --submission .

@@ -76,7 +76,6 @@
         <box size="${body_length} ${body_width} ${body_height}"/>
       </geometry>
     </collision>
-    <xacro:box_inertia m="${body_mass}" x="${body_length}" y="${body_width}" z="${body_height}"/>
   </link>
 
   <!-- ═══════════════════════════════════════════════════════════════

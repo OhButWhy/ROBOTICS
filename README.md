@@ -364,3 +364,59 @@ best_effort publisher не может обслужить reliable subscriber —
 Пакет `course_description` содержит параметризованную модель Ackermann-робота (`vehicle.urdf.xacro`).
 Запуск визуализации: `ros2 launch course_description display.launch.py` (Fixed Frame = `base_link`).
 Проверка: `check_urdf` и тесты пакета.
+
+## PR07 — Симуляция Ackermann в Gazebo (headless)
+
+Пакет `course_simulation` поднимает симуляцию робота-машинки в Gazebo без графического окна, связывает ROS 2 и Gazebo через мост, а также пересчитывает команды управления (Ackermann) и нормализует одометрию.
+
+### Сборка и тесты
+
+```bash
+source /opt/ros/jazzy/setup.bash
+cd "$(git rev-parse --show-toplevel)"
+colcon build --symlink-install --packages-select course_description course_simulation
+colcon test --packages-select course_simulation --event-handlers console_direct+
+colcon test-result --verbose
+```
+
+### Запуск симуляции (Headless)
+
+Терминал 1 — запуск мира (оставить работать):
+
+```bash
+source install/setup.bash
+export GZ_SIM_RESOURCE_PATH="$PWD/src/course_simulation/models${GZ_SIM_RESOURCE_PATH:+:$GZ_SIM_RESOURCE_PATH}"
+ros2 launch course_simulation simulation.launch.py \
+  world:=$PWD/src/course_simulation/worlds/mcity-minimal.sdf \
+  bridge_config:=$PWD/src/course_simulation/config/bridge.yaml \
+  headless:=true
+```
+
+Терминал 2 — подача команды движения (имитация `/drive/safe`):
+
+```bash
+source install/setup.bash
+ros2 topic pub -r 10 /drive/safe ackermann_msgs/msg/AckermannDriveStamped \
+  "{header: auto, drive: {speed: 1.0, steering_angle: 0.0}}"
+```
+
+Терминал 3 — проверка одометрии и TF:
+
+```bash
+source install/setup.bash
+ros2 topic echo /vehicle/odom --once
+ros2 run tf2_ros tf2_echo odom base_link --ros-args -p use_sim_time:=true
+```
+
+### Запись сенсоров в MCAP
+
+Для последующей работы (ПР08) записываем поток в `fixtures/pr07-sensors`:
+
+```bash
+source install/setup.bash
+ros2 bag record --storage mcap --use-sim-time -o fixtures/pr07-sensors \
+  --topics /vehicle/camera/image_raw /vehicle/scan /vehicle/imu /vehicle/odom \
+  /tf /tf_static /clock
+```
+
+**Важно:** папка `fixtures/` и файлы `*.mcap` добавлены в `.gitignore`, так как запись весит сотни мегабайт.
