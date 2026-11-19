@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR09",
+  "commit": "90bbe62dce24c8f153d47d32a4cb7ea793bca883",
+  "course_kit": {
+    "version": "v1-w11",
+    "archive_sha256": "0b67bfd41448549d21122124b7f49211ba2cd068cc56751871f319eadeb9d0ab"
+  },
+  "commands": [
+    "python3 .course-kit/v1/tools/evaluate_perception.py --fixture .course-kit/v1/fixtures/pr09 --manifest data/manifest.json --allow-leak --output evidence/pr09/metrics-before.json",
+    "python3 .course-kit/v1/tools/evaluate_perception.py --fixture .course-kit/v1/fixtures/pr09 --manifest data/manifest.json --output evidence/pr09/metrics.json",
+    "ros2 run perception_baseline perception_node",
+    "ros2 run perception_baseline demo_publisher"
+  ],
+  "tests": [
+    {
+      "name": "test_valid_pair",
+      "status": "passed"
+    },
+    {
+      "name": "test_zero_depth",
+      "status": "passed"
+    },
+    {
+      "name": "test_missing_depth",
+      "status": "passed"
+    },
+    {
+      "name": "test_stamp_mismatch",
+      "status": "passed"
+    },
+    {
+      "name": "test_flake8",
+      "status": "passed"
+    },
+    {
+      "name": "test_pep257",
+      "status": "passed"
+    },
+    {
+      "name": "test_copyright",
+      "status": "skipped"
+    }
+  ],
+  "defect": {
+    "reproducer": "Запуск evaluator с data/manifest.json, содержащим утечку capture_id (sample-03 и sample-04 из capture-a/b попали в test). Оценка завышается: F1=1.0.",
+    "root_cause": "Кадры из одного захвата (capture_id) нельзя разделять между calibration и test, так как это нарушает независимость выборок. Исходный manifest-leaky.json намеренно нарушал это правило, помещая легкие кадры в test.",
+    "proof_after": "Исправление manifest.json (sample-03, sample-04 перенесены в calibration). Пересчет дает F1=0.5, что честно отражает наличие сложных кадров (темный объект и ложная красная область) в тестовой выборке."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true,
+    "dataset_versioned": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 2.5
+  },
+  "ai_used": false
+}

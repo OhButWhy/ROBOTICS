@@ -1,0 +1,70 @@
+{
+  "dataset_id": "pr09-synthetic-v1",
+  "detector_id": "red-component-baseline-v1",
+  "fixture_sha256": "7fe4b0e521f0f237e442da692d0bdd94f4357a755835d529114a1daae01255e5",
+  "manifest_sha256": "37805a0cefa4d41f5d1fd3986e2d71ff8dfd78396b593fb610edab48a7ae279c",
+  "metric_scope": "2d_detections; mean_iou over matched true positives only",
+  "metrics": {
+    "f1": 0.5,
+    "false_negative": 1,
+    "false_positive": 1,
+    "mean_iou": 1.0,
+    "precision": 0.5,
+    "recall": 0.5,
+    "true_positive": 1
+  },
+  "predictions": [
+    {
+      "objects": [],
+      "sample_id": "sample-05"
+    },
+    {
+      "objects": [
+        {
+          "bbox_xywh": [
+            0,
+            0,
+            1,
+            2
+          ],
+          "iou": 0.0,
+          "label": "cone",
+          "matched": false,
+          "position": {
+            "frame_id": "camera_optical_frame",
+            "status": "ok",
+            "x_m": -0.4375,
+            "y_m": -0.1875,
+            "z_m": 1.0
+          }
+        },
+        {
+          "bbox_xywh": [
+            4,
+            3,
+            2,
+            2
+          ],
+          "iou": 1.0,
+          "label": "cone",
+          "matched": true,
+          "position": {
+            "frame_id": "camera_optical_frame",
+            "status": "ok",
+            "x_m": 0.1875,
+            "y_m": 0.1875,
+            "z_m": 1.0
+          }
+        }
+      ],
+      "sample_id": "sample-06"
+    }
+  ],
+  "schema_version": 1,
+  "split_issues": [],
+  "split_valid": true,
+  "test_samples": [
+    "sample-05",
+    "sample-06"
+  ]
+}

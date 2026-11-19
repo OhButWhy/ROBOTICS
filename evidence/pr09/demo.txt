@@ -1,0 +1,15 @@
+# PR09 — Демонстрация работы ROS-ноды (без глубины)
+
+## 2D-детекция (/perception/detections_2d)
+Обнаружен красный объект класса cone с bbox center (4.0, 3.0) и размером 2x2 пикселя.
+frame_id: camera_optical_frame.
+
+## Статус (/perception/status)
+level: WARN (1)
+message: missing_depth
+reason: missing_depth
+(Нода корректно определила отсутствие парного изображения глубины)
+
+## 3D-детекция (/perception/objects_3d)
+detections: []
+(3D-координата не сгенерирована, так как нет глубины. Это правильное поведение по заданию).
