@@ -429,3 +429,10 @@ ros2 bag record --storage mcap --use-sim-time -o fixtures/pr07-sensors \
 ros2 launch localization_case localization.launch.py \
   params_file:=$PWD/src/localization_case/config/amcl.yaml \
   map:=$PWD/.course-kit/v1/fixtures/pr08/map.yaml
+
+## PR09 — Восприятие (perception_baseline)
+Пакет `perception_baseline` содержит ROS-обёртку детектора красных компонент.
+
+### Запуск
+```bash
+ros2 run perception_baseline perception_node

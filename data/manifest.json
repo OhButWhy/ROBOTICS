@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "dataset_id": "pr09-synthetic-v1",
+  "calibration": ["sample-01", "sample-02", "sample-03", "sample-04"],
+  "test": ["sample-05", "sample-06"],
+  "split_rule": {
+    "group_field": "capture_id",
+    "calibration_groups": ["capture-a", "capture-b"],
+    "test_groups": ["capture-c", "capture-d"]
+  }
+}
