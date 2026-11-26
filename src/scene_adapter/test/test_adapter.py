@@ -18,11 +18,7 @@ def adapter():
 
 def load_fixture(name):
     path = os.path.join(
-        os.path.dirname(__file__),
-        '..',
-        'fixtures',
-        'vlm',
-        name)
+        os.path.dirname(__file__), '..', 'fixtures', 'vlm', name)
     with open(path, 'r') as f:
         return f.read()
 
