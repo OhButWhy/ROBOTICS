@@ -1,0 +1,20 @@
+header:
+  stamp:
+    sec: 0
+    nanosec: 0
+  frame_id: base_link
+version: 1
+status: 1
+status_reason: invalid_schema
+traffic_light: 255
+direction_sign: 255
+lane_offset_m: 0.0
+has_stop_line: false
+stop_line_distance_m: 0.0
+has_turn: false
+turn_distance_m: 0.0
+has_obstacle: false
+obstacle_distance_m: 0.0
+confidence: 0.0
+source: unknown
+---

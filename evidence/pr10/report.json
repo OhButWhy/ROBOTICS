@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR10",
+  "commit": "939fff90486ebfafb5978b69987fb8533c8da049",
+  "course_kit": {
+    "version": "v1-w11",
+    "archive_sha256": "0b67bfd41448549d21122124b7f49211ba2cd068cc56751871f319eadeb9d0ab"
+  },
+  "commands": [
+    "colcon build --symlink-install --packages-up-to scene_adapter",
+    "colcon test --packages-select scene_adapter --event-handlers console_direct+",
+    "python3 -m jsonschema -i fixtures/vlm/scene-clear.json contracts/scene-description-v1.schema.json"
+  ],
+  "tests": [
+    {
+      "name": "test_clear_valid",
+      "status": "passed"
+    },
+    {
+      "name": "test_low_confidence",
+      "status": "passed"
+    },
+    {
+      "name": "test_stale",
+      "status": "passed"
+    },
+    {
+      "name": "test_extra_command_rejected",
+      "status": "passed"
+    },
+    {
+      "name": "test_cache_key_components",
+      "status": "passed"
+    },
+    {
+      "name": "test_cache_hit_miss",
+      "status": "passed"
+    },
+    {
+      "name": "test_flake8",
+      "status": "skipped"
+    },
+    {
+      "name": "test_pep257",
+      "status": "skipped"
+    },
+    {
+      "name": "test_copyright",
+      "status": "skipped"
+    }
+  ],
+  "defect": {
+    "reproducer": "В функции compute_cache_key удалён prompt_sha256. При запросе с image1+prompt1, а затем с image1+prompt2 кэш возвращает старый ответ от prompt1.",
+    "root_cause": "Ключ кэша не включает промпт, поэтому изменение промпта не инвалидирует кэш. Это нарушает контракт: разные промпты должны давать разные ответы.",
+    "proof_after": "Восстановлен prompt_sha256 в ключе. Тест test_cache_key_components подтверждает, что изменение любого из 5 компонентов даёт новый ключ (cache miss)."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true,
+    "offline_verified": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 2.5
+  },
+  "ai_used": false
+}

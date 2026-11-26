@@ -1,0 +1,20 @@
+header:
+  stamp:
+    sec: 0
+    nanosec: 0
+  frame_id: base_link
+version: 1
+status: 0
+status_reason: ''
+traffic_light: 3
+direction_sign: 3
+lane_offset_m: 0.03999999910593033
+has_stop_line: true
+stop_line_distance_m: 2.4000000953674316
+has_turn: true
+turn_distance_m: 4.199999809265137
+has_obstacle: false
+obstacle_distance_m: 0.0
+confidence: 0.9100000262260437
+source: mock
+---
