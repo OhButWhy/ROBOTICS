@@ -1,0 +1,10 @@
+scene_adapter:
+  ros__parameters:
+    mode: "mock"
+    fixture_path: "fixtures/vlm/scene-clear.json"
+    cache_dir: "/tmp/scene_cache"
+    prompt_path: "prompts/dummy.txt"
+    model_id: "qwen3.8"
+    generation_config: "{}"
+    abstain_threshold: 0.5
+    max_age_s: 0.25

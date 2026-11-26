@@ -436,3 +436,27 @@ ros2 launch localization_case localization.launch.py \
 ### Запуск
 ```bash
 ros2 run perception_baseline perception_node
+
+## PR10 — Scene Adapter: безопасная интеграция VLM
+
+Пакет `scene_adapter` принимает JSON-ответ от Vision Language Model (VLM) и превращает его в строго типизированное ROS 2-сообщение `SceneDescription`. Главная задача адаптера — **не доверять модели напрямую**: любой невалидный, неуверенный или устаревший ответ превращается в безопасное состояние `unknown`.
+
+### Компоненты
+
+| Компонент | Роль |
+|---|---|
+| `robotics_course_interfaces` | ROS 2-интерфейс `SceneDescription.msg` |
+| `scene_adapter` | Нода-адаптер (mock / cache / live) |
+| `contracts/scene-description-v1.schema.json` | Каноническая JSON Schema (источник ограничений) |
+| `fixtures/vlm/*.json` | 4 фикстуры для offline-тестов |
+| `config/vlm.yaml` | Параметры по умолчанию |
+
+### Сборка и тесты
+
+```bash
+source /opt/ros/jazzy/setup.bash
+cd "$(git rev-parse --show-toplevel)"
+colcon build --symlink-install --packages-up-to scene_adapter
+source install/setup.bash
+colcon test --packages-select scene_adapter --event-handlers console_direct+
+colcon test-result --verbose

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ros.lms.ci.nsu.ru/contracts/scene-description-v1.schema.json",
+  "title": "SceneDescription v1",
+  "description": "Typed perception observation. It never contains an actuator command.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "stamp_s",
+    "frame_id",
+    "status",
+    "status_reason",
+    "lane_offset_m",
+    "traffic_light",
+    "direction_sign",
+    "stop_line_distance_m",
+    "turn_distance_m",
+    "obstacle_distance_m",
+    "confidence",
+    "source"
+  ],
+  "properties": {
+    "version": { "const": 1 },
+    "stamp_s": { "type": "number", "minimum": 0 },
+    "frame_id": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["valid", "unknown"] },
+    "status_reason": {
+      "enum": ["", "invalid_schema", "low_confidence", "stale_input"]
+    },
+    "lane_offset_m": { "type": "number" },
+    "traffic_light": {
+      "enum": ["none", "red", "yellow", "green", "unknown"]
+    },
+    "direction_sign": {
+      "enum": ["none", "left", "right", "straight", "unknown"]
+    },
+    "stop_line_distance_m": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "turn_distance_m": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "obstacle_distance_m": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "source": { "enum": ["live", "cache", "mock", "simulator"] }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "valid" } } },
+      "then": { "properties": { "status_reason": { "const": "" } } }
+    },
+    {
+      "if": { "properties": { "status": { "const": "unknown" } } },
+      "then": {
+        "properties": {
+          "status_reason": {
+            "enum": ["invalid_schema", "low_confidence", "stale_input"]
+          },
+          "traffic_light": { "const": "unknown" },
+          "direction_sign": { "const": "unknown" },
+          "stop_line_distance_m": { "const": null },
+          "turn_distance_m": { "const": null },
+          "obstacle_distance_m": { "const": null },
+          "confidence": { "const": 0 }
+        }
+      }
+    }
+  ]
+}
