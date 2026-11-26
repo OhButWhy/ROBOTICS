@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "stamp_s": 1.0,
+  "frame_id": "base_link",
+  "status": "valid",
+  "status_reason": "",
+  "lane_offset_m": 0.03,
+  "traffic_light": "green",
+  "direction_sign": "straight",
+  "stop_line_distance_m": 2.4,
+  "turn_distance_m": 4.2,
+  "obstacle_distance_m": null,
+  "confidence": 0.91,
+  "source": "mock"
+}
